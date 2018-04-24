@@ -10,6 +10,9 @@
             <transition-group>
               <li class="card_item item_card" v-for="(card, index) in activeCards" :key="card.name">
                 <zpm-card :data="card"></zpm-card>
+                <div slot="foot" class="tag_container">
+                  <Icon type="pin" size="20"></Icon>
+                </div>
               </li>
             </transition-group>
           </zpm-draggable>
@@ -21,7 +24,7 @@
                 <li class="card_item item_card" v-for="(card, index) in inactiveCards" :key="card.name">
                   <zpm-card :data="card"></zpm-card>
                 </li>
-                <li key="footer" class="card_item card_plus">
+                <li key="footer" class="card_plus">
                   <div class="card_plus_inner">
                     <Icon type="ios-plus-empty" size="100"></Icon>
                   </div>
@@ -140,7 +143,8 @@
   .bb {
     border-bottom: 1px solid #ccc;
   }
-  .card_item {
+  .item_card {
+    position: relative;
     width: 375px;
     /*height: 226px;*/
     /*width: 200px;*/
@@ -149,6 +153,28 @@
     /*height: 452px;*/
     margin: 0 10px;
     cursor: move;
+    overflow: hidden;
+  }
+  .tag_container {
+    width: 100px;
+    height: 30px;
+    background-color: cyan;
+    position: absolute;
+    right: -25px;
+    top: 10px;
+    pointer-events: none;
+    -webkit-transform: rotate(45deg);
+    -moz-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    -o-transform: rotate(45deg);
+    transform: rotate(45deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .tag_container i {
+    color: #ffffff;
+    font-weight: bold;
   }
 
   .card_plus {
