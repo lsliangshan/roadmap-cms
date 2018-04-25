@@ -3,7 +3,7 @@
     <div class="card_item">
       <div class="card_item_inner">
         <div class="card_header_title top-title">
-          <span class="title" v-text="data.category"></span>
+          <span class="title" v-text="data.category" contenteditable data-type="category" @input="change" style="cursor: text!important;"></span>
         </div>
         <div class="card_main_container">
           <div class="card_main_left">
@@ -13,10 +13,10 @@
           <div class="card_main_right">
             <div class="card_main_right_wrapper">
               <div class="card_main_right_title">
-                <span class="card_main_right_title_text" v-text="data.title"></span>
+                <span class="card_main_right_title_text" v-text="data.title" contenteditable data-type="title" @input="change" style="cursor: text!important;"></span>
               </div>
               <div class="card_main_right_sub_title">
-                <span class="card_main_right_sub_title_text" v-text="data.content"></span>
+                <span class="card_main_right_sub_title_text" v-text="data.content" contenteditable data-type="content" @input="change" style="cursor: text!important;"></span>
               </div>
             </div>
           </div>
@@ -271,6 +271,71 @@
     },
     data () {
       return {
+        cacheCardData: JSON.parse(JSON.stringify(this.data))
+      }
+    },
+    created () {
+      let contenteditables = document.querySelectorAll('[contenteditable]')
+      contenteditables.forEach(function (item) {
+        // 干掉IE http之类地址自动加链接
+        try {
+          document.execCommand('AutoUrlDetect', false, false)
+        } catch (e) {}
+
+        item.oninput = function (e) {
+          if (e.inputType === 'insertParagraph') {
+            console.log('>>>>>>', e)
+          }
+        }
+
+        item.onpaste = function (e) {
+          e.preventDefault()
+          var text = null
+          var textRange
+
+          if (window.clipboardData && window.clipboardData.setData) {
+            // IE
+            text = window.clipboardData.getData('text')
+          } else {
+            text = (e.originalEvent || e).clipboardData.getData('text/plain') || prompt('在这里输入文本')
+          }
+          if (document.body.createTextRange) {
+            if (document.selection) {
+              textRange = document.selection.createRange()
+            } else if (window.getSelection) {
+              var sel = window.getSelection()
+              var range = sel.getRangeAt(0)
+
+              // 创建临时元素，使得TextRange可以移动到正确的位置
+              var tempEl = document.createElement('span')
+              tempEl.innerHTML = '&#FEFF;'
+              range.deleteContents()
+              range.insertNode(tempEl)
+              textRange = document.body.createTextRange()
+              textRange.moveToElementText(tempEl)
+              tempEl.parentNode.removeChild(tempEl)
+            }
+            textRange.text = text
+            textRange.collapse(false)
+            textRange.select()
+          } else {
+            // Chrome之类浏览器
+            document.execCommand('insertText', false, text)
+          }
+        }
+      })
+    },
+    methods: {
+      change (e) {
+        this.cacheCardData[e.target.dataset.type] = e.target.innerHTML
+      }
+    },
+    watch: {
+      cacheCardData: {
+        deep: true,
+        handler (val) {
+          console.log('.........', val)
+        }
       }
     },
     components: {}

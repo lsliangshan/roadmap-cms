@@ -9,9 +9,11 @@
           <zpm-draggable element="ul" class="cards_body_draggable_container" v-model="activeCards" :options="dragOptions" :move="onMove">
             <transition-group>
               <li class="card_item item_card" v-for="(card, index) in activeCards" :key="card.name">
-                <zpm-card :data="card"></zpm-card>
+                <zpm-card :data="card" @change=""></zpm-card>
                 <div slot="foot" class="tag_container">
                   <Icon type="pin" size="20"></Icon>
+                  <div class="tag_container_angle_1"></div>
+                  <div class="tag_container_angle_2"></div>
                 </div>
               </li>
             </transition-group>
@@ -19,7 +21,7 @@
         </div>
         <div class="" style="width: 100%; height: 100%;">
           <div class="cards_body_inactive_container cards_body_item_container">
-            <zpm-draggable element="ul" class="cards_body_draggable_container" v-model="inactiveCards" :options="dragOptions" :move="onMove" v-test>
+            <zpm-draggable element="ul" class="cards_body_draggable_container pr" v-model="inactiveCards" :options="dragOptions" :move="onMove" v-test>
               <transition-group>
                 <li class="card_item item_card" v-for="(card, index) in inactiveCards" :key="card.name">
                   <zpm-card :data="card"></zpm-card>
@@ -54,7 +56,8 @@
     </div>
   </div>
 </template>
-<style scoped>
+<style scoped lang="scss">
+  @import "../../../assets/css/theme.scss";
   .flip-list-move {
     transition: transform 0.5s;
   }
@@ -132,6 +135,8 @@
     display: flex;
     align-items: center;
     justify-content: flex-start;
+  }
+  .cards_body_draggable_container.pr span {
     padding-right: 200px;
   }
   .cards_body_active_container {
@@ -146,6 +151,7 @@
   .item_card {
     position: relative;
     width: 375px;
+    height: 235px;
     /*height: 226px;*/
     /*width: 200px;*/
     /*height: 121px;*/
@@ -155,26 +161,54 @@
     cursor: move;
     overflow: hidden;
   }
+
   .tag_container {
-    width: 100px;
-    height: 30px;
-    background-color: cyan;
     position: absolute;
-    right: -25px;
-    top: 10px;
-    pointer-events: none;
+    right: 0;
+    top: 0;
+    width: 80px;
+    height: 80px;
+    background-color: $theme;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .tag_container.disabled {
+    background-color: #c8c8c8;
+    cursor: not-allowed;
+  }
+  .tag_container i {
+    color: #ffffff;
+    font-weight: bold;
+    margin-bottom: 25%;
+    margin-left: 25%;
     -webkit-transform: rotate(45deg);
     -moz-transform: rotate(45deg);
     -ms-transform: rotate(45deg);
     -o-transform: rotate(45deg);
     transform: rotate(45deg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
   }
-  .tag_container i {
-    color: #ffffff;
-    font-weight: bold;
+  .tag_container_angle_1 {
+    position: absolute;
+    right: -2px;
+    top: -2px;
+    width: 0;
+    height: 0;
+    border-top: 21px solid #ffffff;
+    border-right: 21px solid #FFFFFF;
+    border-left: 21px solid transparent;
+    border-bottom: 21px solid transparent;
+  }
+  .tag_container_angle_2 {
+    position: absolute;
+    left: -1px;
+    bottom: -1px;
+    width: 0;
+    height: 0;
+    border-left: 41px solid #FFFFFF;
+    border-bottom: 41px solid #FFFFFF;
+    border-top: 41px solid transparent;
+    border-right: 41px solid transparent;
   }
 
   .card_plus {
@@ -193,7 +227,11 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #ffffff;
+    color: $theme_o_5;
+    cursor: pointer;
+  }
+  .card_plus_inner:hover {
+    color: $theme;
   }
   .card_plus_inner i {
     font-weight: bold;
