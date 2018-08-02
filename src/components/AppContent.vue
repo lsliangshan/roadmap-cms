@@ -32,7 +32,7 @@
     height: calc(100% - 61px);
     /*border-left: 1px solid #d7dde4;*/
     box-sizing: border-box;
-    overflow: hidden;
+    /*overflow: hidden;*/
     background-color: #f5f7f9;
   }
   .window_full_screen {

@@ -88,4 +88,24 @@
   .cards_index_container .ivu-tooltip-rel {
     position: static;
   }
+
+  .card_edit_modal .ivu-modal-body {
+    background-color: #f5f5f5!important;
+  }
+  .card_edit_panel .ivu-tabs-bar {
+    margin-bottom: 0;
+  }
+  .card_edit_panel .ivu-tabs-content {
+    height: calc(100% - 32px);
+  }
+  .card_edit_panel .ivu-tabs-nav-container {
+    margin-left: -1px;
+  }
+  .card_edit_panel .ivu-tabs.ivu-tabs-card>.ivu-tabs-bar .ivu-tabs-tab:nth-child(2) {
+    border-radius: 0 4px 0 0;
+  }
+
+  .ivu-color-picker-transfer {
+    z-index: 99999;
+  }
 </style>

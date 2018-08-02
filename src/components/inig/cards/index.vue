@@ -9,7 +9,7 @@
           <zpm-draggable element="ul" class="cards_body_draggable_container" v-model="activeCards" :options="dragOptions" :move="onMove">
             <transition-group>
               <li class="card_item item_card" v-for="(card, index) in activeCards" :key="card.name">
-                <zpm-card :data="card" @change="" @change-image="changeImage" target="activeCards" :index="index" @choose-image="chooseImage"></zpm-card>
+                <zpm-card :data="card" @change="" @edit="openEditCard" @change-image="changeImage" target="activeCards" :index="index" @choose-image="chooseImage"></zpm-card>
                 <div slot="foot" class="tag_container">
                   <Tooltip content="保存">
                     <Icon type="ios-cloud-upload-outline" size="20"></Icon>
@@ -72,12 +72,93 @@
         <input type="text" class="custom_input" placeholder="请输入图片url" :value="uploadImageModal.dest || uploadImageModal.origin" @input="changeImageUrl"/>
       </div>
     </Modal>
+
+    <Modal v-model="cardEditModal.shown"
+           title="编辑卡片"
+           ok-text="保存"
+           class="card_edit_modal"
+           @on-ok="saveCard"
+           @on-cancel="cancelSaveCard"
+    >
+      <zpm-card :data="cardEditModal.data"
+                :target="cardEditModal.target"
+                :index="cardEditModal.index"
+                :for-edit="true"
+                :reset-select="resetSelect"
+                @edit-item="editItem"
+      ></zpm-card>
+    </Modal>
+
+    <div class="card_edit_panel" :class="{'shown': cardEditPanel.shown}">
+      <div class="card_edit_panel_inner">
+        <Tabs type="card" style="height: 100%;">
+          <TabPane class="tab_item" v-for="item in cardEditItems" :key="item.value" :label="item.text">
+            <keep-alive>
+              <component :data="cardEditPanel" :is="'panel-' + item.value"></component>
+            </keep-alive>
+          </TabPane>
+          <div class="card_edit_panel_close_container" slot="extra" @click="closeEditPanel">
+            <Icon type="ios-close-empty" size="30" class="card_edit_panel_close"></Icon>
+          </div>
+        </Tabs>
+      </div>
+    </div>
   </div>
 </template>
 <style scoped lang="scss">
   @import "../../../assets/css/theme.scss";
   .flip-list-move {
     transition: transform 0.5s;
+  }
+
+  .card_edit_panel {
+    position: absolute;
+    width: 320px;
+    height: calc(100% + 60px);
+    right: 0;
+    top: -60px;
+    z-index: 9999;
+    background-color: #FFFFFF;
+    padding-top: 10px;
+    box-sizing: border-box;
+    -webkit-transform: translate3d(320px, 0, 0);
+    -moz-transform: translate3d(320px, 0, 0);
+    -ms-transform: translate3d(320px, 0, 0);
+    -o-transform: translate3d(320px, 0, 0);
+    transform: translate3d(320px, 0, 0);
+    -webkit-transition: -webkit-transform .3s cubic-bezier(0.215, 0.610, 0.355, 1.000);
+    -moz-transition: -moz-transform .3s cubic-bezier(0.215, 0.610, 0.355, 1.000);
+    -ms-transition: -ms-transform .3s cubic-bezier(0.215, 0.610, 0.355, 1.000);
+    -o-transition: -o-transform .3s cubic-bezier(0.215, 0.610, 0.355, 1.000);
+    transition: transform .3s cubic-bezier(0.215, 0.610, 0.355, 1.000);
+  }
+  .card_edit_panel.shown {
+    -webkit-transform: translate3d(0, 0, 0);
+    -moz-transform: translate3d(0, 0, 0);
+    -ms-transform: translate3d(0, 0, 0);
+    -o-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+  }
+  .card_edit_panel_inner {
+    width: 100%;
+    height: 100%;
+    border-left: 1px solid #dddee1;
+  }
+  .tab_item {
+    width: 100%;
+    height: 100%;
+  }
+  .card_edit_panel_close_container {
+    width: 32px;
+    height: 32px;
+    margin-right: 5px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  .card_edit_panel_close {
+    pointer-events: none;
   }
 
   .image_preview {
@@ -298,7 +379,27 @@
             content: '完善简历后，才可以投递哦~',
             image: 'https://img09.zhaopin.cn/2012/other/mobile/weex/interviewCard/card_resume_perfect_2.png',
             btnOkIcon: 'https://img09.zhaopin.cn/2012/other/mobile/weex/interviewCard/icon_resume_perfect_2.png',
-            btnOkText: '完善简历'
+            btnOkText: '完善简历',
+            categoryStyles: {
+              fontSize: '32px',
+              color: '#282828',
+              fontWeight: '500'
+            },
+            imageStyles: {},
+            titleStyles: {
+              fontSize: '36px',
+              color: '#282828',
+              fontWeight: '500'
+            },
+            contentStyles: {
+              fontSize: '28px',
+              color: '#666666'
+            },
+            btnOkIconStyles: {},
+            btnOkTextStyles: {
+              fontSize: '28px',
+              color: '#1A8AFA'
+            }
           },
           {
             name: 'forum',
@@ -307,7 +408,13 @@
             content: '中国女性领导力高峰论坛开启~',
             image: 'https://img09.zhaopin.cn/2012/other/mobile/weex/interviewCard/card_forum_2.png',
             btnOkIcon: 'https://img09.zhaopin.cn/2012/other/mobile/weex/interviewCard/icon_forum_2.png',
-            btnOkText: '参与活动'
+            btnOkText: '参与活动',
+            categoryStyles: {},
+            imageStyles: {},
+            titleStyles: {},
+            contentStyles: {},
+            btnOkIconStyles: {},
+            btnOkTextStyles: {}
           },
           {
             name: 'arrangement',
@@ -316,7 +423,13 @@
             content: '面试安排详情',
             image: 'https://img09.zhaopin.cn/2012/other/mobile/weex/interviewCard/card_arrangement_2.png',
             btnOkIcon: 'https://img09.zhaopin.cn/2012/other/mobile/weex/interviewCard/icon_arrangement_2.png',
-            btnOkText: '查看'
+            btnOkText: '查看',
+            categoryStyles: {},
+            imageStyles: {},
+            titleStyles: {},
+            contentStyles: {},
+            btnOkIconStyles: {},
+            btnOkTextStyles: {}
           },
           {
             name: 'invitation',
@@ -325,7 +438,13 @@
             content: '面试邀请详情',
             image: 'https://img09.zhaopin.cn/2012/other/mobile/weex/interviewCard/card_invitation_2.png',
             btnOkIcon: 'https://img09.zhaopin.cn/2012/other/mobile/weex/interviewCard/icon_invitation_2.png',
-            btnOkText: '查看'
+            btnOkText: '查看',
+            categoryStyles: {},
+            imageStyles: {},
+            titleStyles: {},
+            contentStyles: {},
+            btnOkIconStyles: {},
+            btnOkTextStyles: {}
           }
         ],
         inactiveCards: [
@@ -336,7 +455,13 @@
             content: 'in-完善简历后，才可以投递哦~',
             image: 'https://img09.zhaopin.cn/2012/other/mobile/weex/interviewCard/card_resume_perfect_2.png',
             btnOkIcon: 'https://img09.zhaopin.cn/2012/other/mobile/weex/interviewCard/icon_resume_perfect_2.png',
-            btnOkText: 'in-完善简历'
+            btnOkText: 'in-完善简历',
+            categoryStyles: {},
+            imageStyles: {},
+            titleStyles: {},
+            contentStyles: {},
+            btnOkIconStyles: {},
+            btnOkTextStyles: {}
           },
           {
             name: 'in-forum',
@@ -345,7 +470,13 @@
             content: 'in-中国女性领导力高峰论坛开启~',
             image: 'https://img09.zhaopin.cn/2012/other/mobile/weex/interviewCard/card_forum_2.png',
             btnOkIcon: 'https://img09.zhaopin.cn/2012/other/mobile/weex/interviewCard/icon_forum_2.png',
-            btnOkText: 'in-参与活动'
+            btnOkText: 'in-参与活动',
+            categoryStyles: {},
+            imageStyles: {},
+            titleStyles: {},
+            contentStyles: {},
+            btnOkIconStyles: {},
+            btnOkTextStyles: {}
           },
           {
             name: 'in-arrangement',
@@ -354,7 +485,13 @@
             content: 'in-面试安排详情',
             image: 'https://img09.zhaopin.cn/2012/other/mobile/weex/interviewCard/card_arrangement_2.png',
             btnOkIcon: 'https://img09.zhaopin.cn/2012/other/mobile/weex/interviewCard/icon_arrangement_2.png',
-            btnOkText: 'in-查看'
+            btnOkText: 'in-查看',
+            categoryStyles: {},
+            imageStyles: {},
+            titleStyles: {},
+            contentStyles: {},
+            btnOkIconStyles: {},
+            btnOkTextStyles: {}
           },
           {
             name: 'in-invitation',
@@ -363,7 +500,13 @@
             content: 'in-面试邀请详情',
             image: 'https://img09.zhaopin.cn/2012/other/mobile/weex/interviewCard/card_invitation_2.png',
             btnOkIcon: 'https://img09.zhaopin.cn/2012/other/mobile/weex/interviewCard/icon_invitation_2.png',
-            btnOkText: 'in-查看'
+            btnOkText: 'in-查看',
+            categoryStyles: {},
+            imageStyles: {},
+            titleStyles: {},
+            contentStyles: {},
+            btnOkIconStyles: {},
+            btnOkTextStyles: {}
           }
         ],
         showFooter: false,
@@ -373,7 +516,31 @@
           dest: '',
           name: '',
           index: -1
-        }
+        },
+        cardEditModal: {
+          shown: false,
+          index: -1,
+          target: '', // activeCards、inactiveCards
+          data: {}
+        },
+        cardEditPanel: {
+          shown: false,
+          index: -1,
+          target: '', // activeCards、inactiveCards
+          data: {},
+          type: ''
+        },
+        cardEditItems: [
+          {
+            text: '样式',
+            value: 'style'
+          },
+          {
+            text: '事件',
+            value: 'event'
+          }
+        ],
+        resetSelect: false
       }
     },
     computed: {
@@ -388,6 +555,29 @@
       }
     },
     methods: {
+      cancelSaveCard () {
+        this.closeEditPanel()
+      },
+      saveCard () {},
+      openEditCard (data) {
+        this.cardEditModal = Object.assign({}, data, {
+          shown: true
+        })
+      },
+      closeEditPanel () {
+        this.cardEditPanel = {
+          shown: false,
+          index: -1,
+          target: '', // activeCards、inactiveCards
+          data: {},
+          type: ''
+        }
+      },
+      editItem (data) {
+        this.cardEditPanel = Object.assign({}, data, {
+          shown: true
+        })
+      },
       changeImage (args) {
         this.uploadImageModal.shown = false
       },
@@ -444,13 +634,25 @@
 //        return (!relatedElement || !relatedElement.fixed) && !draggedElement.fixed
       }
     },
+    watch: {
+      'cardEditPanel.shown' (val) {
+        if (!val) {
+          this.resetSelect = false
+          setTimeout(() => {
+            this.resetSelect = true
+          }, 10)
+        }
+      }
+    },
     directives: {
       test: function (el) {
-        console.log('>>>>', el)
+        // console.log('>>>>', el)
       }
     },
     components: {
-      ZpmCard: () => import('./ZpmCard.vue')
+      ZpmCard: () => import('./ZpmCard.vue'),
+      PanelStyle: () => import('./PanelStyle.vue'),
+      PanelEvent: () => import('./PanelEvent.vue')
     }
   }
 </script>
