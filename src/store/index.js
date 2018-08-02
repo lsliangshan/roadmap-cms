@@ -80,7 +80,7 @@ const store = new Vuex.Store({
     requestInfo: {
       token: 'ee2c91d2ed36439ebccb9d8b4a67e282',
       // baseUrl: 'http://172.30.24.71:8081',
-      baseUrl: 'http://operationconfig.zhaopin.com',
+      baseUrl: 'http://api.open.zhaopin.com',
       // baseUrl: 'http://api.open.zhaopin.com',
       getAllOperationConfigGroup: '/operationcfg/operationconfig/getAllOperationConfigGroup',
       getAllOperationConfigUnit: '/operationcfg/operationconfig/getAllOperationConfigUnit'

@@ -250,16 +250,35 @@
                       justifyContent: 'center'
                     }
                   }, [
-                    h('img', {
+                    h('Poptip', {
                       attrs: {
-                        src: params.row.tempImgPath
-                      },
-                      style: {
-                        maxWidth: '150px',
-                        maxHeight: '150px',
-                        backgroundColor: '#f9f9f9'
+                        class: 'entrance_table_tip',
+                        trigger: 'hover',
+                        title: '图片地址',
+                        content: params.row.tempImgPath
                       }
-                    })
+                    }, [
+                      h('img', {
+                        attrs: {
+                          src: params.row.tempImgPath
+                        },
+                        style: {
+                          width: '108px',
+                          // height: '150px',
+                          backgroundColor: '#f9f9f9'
+                        }
+                      })
+                    ])
+                    // h('img', {
+                    //   attrs: {
+                    //     src: params.row.tempImgPath
+                    //   },
+                    //   style: {
+                    //     maxWidth: '150px',
+                    //     maxHeight: '150px',
+                    //     backgroundColor: '#f9f9f9'
+                    //   }
+                    // })
                   ])
 //                  ,
 //                  h('span', params.row.tempImgPath)
@@ -391,6 +410,10 @@
             outList[i].tempImgDesc = tempData.title
             outList[i].tempImgPath = tempData.imgUrl
             outList[i].tempRedirectUrl = tempData.url
+          } else {
+            outList[i].tempImgDesc = outList[i].operationModuleInfo.title
+            outList[i].tempImgPath = outList[i].operationModuleInfo.imgUrl
+            outList[i].tempRedirectUrl = outList[i].operationModuleInfo.url
           }
         }
         return outList
@@ -410,7 +433,11 @@
           // 获取数据失败
           this.$router.go(0)
         } else {
-          this.allAds = this.formatAdsForTable(allAdsData.data) // .concat(allAdsData.data, allAdsData.data, allAdsData.data)
+          if (!allAdsData.data) {
+            this.$Message.error('数据获取失败')
+          } else {
+            this.allAds = this.formatAdsForTable(allAdsData.data) // .concat(allAdsData.data, allAdsData.data, allAdsData.data)
+          }
           setTimeout(() => {
             this.loadingTableData = false
           }, 800)

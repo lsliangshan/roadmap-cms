@@ -6,7 +6,7 @@
           <span class="title" v-text="data.category" contenteditable data-type="category" @input="change" style="cursor: text!important;"></span>
         </div>
         <div class="card_main_container">
-          <div class="card_main_left">
+          <div class="card_main_left" :data-src="data.image" data-name="image" @click="chooseImage">
             <img :src="data.image" class="card_main_left_image"/>
             <!--<img :src="data.image" resize="cover" class="card_main_left_image"/>-->
           </div>
@@ -22,12 +22,12 @@
           </div>
         </div>
         <div class="card_bottom_container">
-          <div class="card_bottom_left">
-            <img :src="data.btn.ok.icon" class="card_bottom_left_image"/>
+          <div class="card_bottom_left" :data-src="data.btnOkIcon" data-name="btnOkIcon" @click="chooseImage">
+            <img :src="data.btnOkIcon" class="card_bottom_left_image"/>
             <!--<img :src="data.btn.ok.icon" resize="cover" class="card_bottom_left_image"/>-->
           </div>
           <div class="card_bottom_right">
-            <span class="card_bottom_right_text" v-text="data.btn.ok.text"></span>
+            <span class="card_bottom_right_text" v-text="data.btnOkText" contenteditable data-type="btnOkText" @input="change" style="cursor: text!important;"></span>
           </div>
         </div>
       </div>
@@ -115,13 +115,18 @@
 
     width: 116px;
     height: 118px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   .card_main_left_image {
     /*width: 232px;*/
     /*height: 236px;*/
 
-    width: 116px;
-    height: 118px;
+    max-width: 116px;
+    max-height: 118px;
+    pointer-events: none;
   }
   .card_main_right {
     /*width: 450px;*/
@@ -227,6 +232,7 @@
 
     width: 20px;
     height: 20px;
+    cursor: pointer;
   }
   .card_bottom_left_image {
     /*width: 40px;*/
@@ -234,6 +240,7 @@
 
     width: 20px;
     height: 20px;
+    pointer-events: none;
   }
   .card_bottom_right {
     /*height: 40px;*/
@@ -267,6 +274,14 @@
         default: function () {
           return {}
         }
+      },
+      target: {
+        type: String,
+        default: ''
+      },
+      index: {
+        type: Number,
+        default: -1
       }
     },
     data () {
@@ -328,6 +343,15 @@
     methods: {
       change (e) {
         this.cacheCardData[e.target.dataset.type] = e.target.innerHTML
+        this.$emit('change', this.cacheCardData)
+      },
+      chooseImage (e) {
+        this.$emit('choose-image', {
+          src: e.target.dataset.src,
+          target: this.target,
+          index: Number(this.index),
+          name: e.target.dataset.name
+        })
       }
     },
     watch: {

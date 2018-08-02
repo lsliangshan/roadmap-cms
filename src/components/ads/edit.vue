@@ -657,8 +657,8 @@
               message: '图片地址格式不正确，请以 http:// 或 https:// 或 // 开头'
             },
             {
-              pattern: /\.(jpg|jpeg|png)$/,
-              message: '图片格式不正确，请输入.jpg|.jpeg|.png格式的图片地址'
+              pattern: /\.(jpg|jpeg|png|gif|bmp)$/,
+              message: '图片格式不正确，请输入.jpg|.jpeg|.png|.gif|.bmp格式的图片地址'
             }
           ],
           'operationModuleInfo.title': [
@@ -689,7 +689,10 @@
     },
     created () {
       this.$nextTick(() => {
-        this.formData = JSON.parse(JSON.stringify(this.editData))
+        this.formData = Object.assign({}, this.editData) // JSON.parse(JSON.stringify(this.editData))
+        if (!this.formData.operationModuleInfo.params) {
+          this.formData.operationModuleInfo.params = {}
+        }
       })
     },
     methods: {
@@ -918,7 +921,7 @@
       removeSelectedCity (e) {
         let _code = e.target.dataset.code
         let ele = this.$refs[this.cityRef.sub + _code]
-        if (ele) {
+        if (ele && ele[0]) {
           ele = ele[0]
           if (ele.classList.contains('active')) {
             ele.classList.remove('active')

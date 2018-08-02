@@ -9,22 +9,24 @@
           <zpm-draggable element="ul" class="cards_body_draggable_container" v-model="activeCards" :options="dragOptions" :move="onMove">
             <transition-group>
               <li class="card_item item_card" v-for="(card, index) in activeCards" :key="card.name">
-                <zpm-card :data="card" @change=""></zpm-card>
+                <zpm-card :data="card" @change="" @change-image="changeImage" target="activeCards" :index="index" @choose-image="chooseImage"></zpm-card>
                 <div slot="foot" class="tag_container">
-                  <Icon type="pin" size="20"></Icon>
-                  <div class="tag_container_angle_1"></div>
-                  <div class="tag_container_angle_2"></div>
+                  <Tooltip content="保存">
+                    <Icon type="ios-cloud-upload-outline" size="20"></Icon>
+                    <div class="tag_container_angle_1"></div>
+                    <div class="tag_container_angle_2"></div>
+                  </Tooltip>
                 </div>
               </li>
             </transition-group>
           </zpm-draggable>
         </div>
-        <div class="" style="width: 100%; height: 100%;">
+        <div class="" style="width: 100%; height: 100%; min-width: 400px;">
           <div class="cards_body_inactive_container cards_body_item_container">
             <zpm-draggable element="ul" class="cards_body_draggable_container pr" v-model="inactiveCards" :options="dragOptions" :move="onMove" v-test>
               <transition-group>
                 <li class="card_item item_card" v-for="(card, index) in inactiveCards" :key="card.name">
-                  <zpm-card :data="card"></zpm-card>
+                  <zpm-card :data="card" @change="" @change-image="changeImage" target="inactiveCards" :index="index" @choose-image="chooseImage"></zpm-card>
                 </li>
                 <li key="footer" class="card_plus">
                   <div class="card_plus_inner">
@@ -54,12 +56,55 @@
         <!--</div>-->
       <!--</div>-->
     </div>
+
+    <Modal
+      v-model="uploadImageModal.shown"
+      title="更换图片"
+      @on-ok="confirmChangeImage"
+      @on-cancel="cancelChangeImage"
+    >
+      <div class="image_preview">
+        <div class="image_preview_wrapper">
+          <img :src="uploadImageModal.dest || uploadImageModal.origin">
+        </div>
+      </div>
+      <div class="input_item">
+        <input type="text" class="custom_input" placeholder="请输入图片url" :value="uploadImageModal.dest || uploadImageModal.origin" @input="changeImageUrl"/>
+      </div>
+    </Modal>
   </div>
 </template>
 <style scoped lang="scss">
   @import "../../../assets/css/theme.scss";
   .flip-list-move {
     transition: transform 0.5s;
+  }
+
+  .image_preview {
+    width: 100%;
+    /*height: 100px;*/
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .image_preview_wrapper {
+    width: 96px;
+    height: 96px;
+    border-radius: 5px;
+    background-color: rgba(0, 0, 0, .1);
+    overflow: hidden;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+  }
+  .image_preview img {
+    max-width: 90px;
+    max-height: 90px;
+    background-color: #ffffff;
+  }
+  .input_item {
+    margin-top: 15px;
   }
 
   .no-move {
@@ -180,8 +225,10 @@
   .tag_container i {
     color: #ffffff;
     font-weight: bold;
-    margin-bottom: 25%;
-    margin-left: 25%;
+    /*margin-bottom: 25%;*/
+    /*margin-left: 25%;*/
+    margin-bottom: 110%;
+    margin-left: 65%;
     -webkit-transform: rotate(45deg);
     -moz-transform: rotate(45deg);
     -ms-transform: rotate(45deg);
@@ -250,12 +297,8 @@
             title: '你的简历不完整',
             content: '完善简历后，才可以投递哦~',
             image: 'https://img09.zhaopin.cn/2012/other/mobile/weex/interviewCard/card_resume_perfect_2.png',
-            btn: {
-              ok: {
-                icon: 'https://img09.zhaopin.cn/2012/other/mobile/weex/interviewCard/icon_resume_perfect_2.png',
-                text: '完善简历'
-              }
-            }
+            btnOkIcon: 'https://img09.zhaopin.cn/2012/other/mobile/weex/interviewCard/icon_resume_perfect_2.png',
+            btnOkText: '完善简历'
           },
           {
             name: 'forum',
@@ -263,12 +306,8 @@
             title: '你的潜力 不止于此',
             content: '中国女性领导力高峰论坛开启~',
             image: 'https://img09.zhaopin.cn/2012/other/mobile/weex/interviewCard/card_forum_2.png',
-            btn: {
-              ok: {
-                icon: 'https://img09.zhaopin.cn/2012/other/mobile/weex/interviewCard/icon_forum_2.png',
-                text: '参与活动'
-              }
-            }
+            btnOkIcon: 'https://img09.zhaopin.cn/2012/other/mobile/weex/interviewCard/icon_forum_2.png',
+            btnOkText: '参与活动'
           },
           {
             name: 'arrangement',
@@ -276,12 +315,8 @@
             title: '你的面试安排',
             content: '面试安排详情',
             image: 'https://img09.zhaopin.cn/2012/other/mobile/weex/interviewCard/card_arrangement_2.png',
-            btn: {
-              ok: {
-                icon: 'https://img09.zhaopin.cn/2012/other/mobile/weex/interviewCard/icon_arrangement_2.png',
-                text: '查看'
-              }
-            }
+            btnOkIcon: 'https://img09.zhaopin.cn/2012/other/mobile/weex/interviewCard/icon_arrangement_2.png',
+            btnOkText: '查看'
           },
           {
             name: 'invitation',
@@ -289,12 +324,8 @@
             title: '你的面试邀请',
             content: '面试邀请详情',
             image: 'https://img09.zhaopin.cn/2012/other/mobile/weex/interviewCard/card_invitation_2.png',
-            btn: {
-              ok: {
-                icon: 'https://img09.zhaopin.cn/2012/other/mobile/weex/interviewCard/icon_invitation_2.png',
-                text: '查看'
-              }
-            }
+            btnOkIcon: 'https://img09.zhaopin.cn/2012/other/mobile/weex/interviewCard/icon_invitation_2.png',
+            btnOkText: '查看'
           }
         ],
         inactiveCards: [
@@ -304,12 +335,8 @@
             title: 'in-你的简历不完整',
             content: 'in-完善简历后，才可以投递哦~',
             image: 'https://img09.zhaopin.cn/2012/other/mobile/weex/interviewCard/card_resume_perfect_2.png',
-            btn: {
-              ok: {
-                icon: 'https://img09.zhaopin.cn/2012/other/mobile/weex/interviewCard/icon_resume_perfect_2.png',
-                text: 'in-完善简历'
-              }
-            }
+            btnOkIcon: 'https://img09.zhaopin.cn/2012/other/mobile/weex/interviewCard/icon_resume_perfect_2.png',
+            btnOkText: 'in-完善简历'
           },
           {
             name: 'in-forum',
@@ -317,12 +344,8 @@
             title: 'in-你的潜力 不止于此',
             content: 'in-中国女性领导力高峰论坛开启~',
             image: 'https://img09.zhaopin.cn/2012/other/mobile/weex/interviewCard/card_forum_2.png',
-            btn: {
-              ok: {
-                icon: 'https://img09.zhaopin.cn/2012/other/mobile/weex/interviewCard/icon_forum_2.png',
-                text: 'in-参与活动'
-              }
-            }
+            btnOkIcon: 'https://img09.zhaopin.cn/2012/other/mobile/weex/interviewCard/icon_forum_2.png',
+            btnOkText: 'in-参与活动'
           },
           {
             name: 'in-arrangement',
@@ -330,12 +353,8 @@
             title: 'in-你的面试安排',
             content: 'in-面试安排详情',
             image: 'https://img09.zhaopin.cn/2012/other/mobile/weex/interviewCard/card_arrangement_2.png',
-            btn: {
-              ok: {
-                icon: 'https://img09.zhaopin.cn/2012/other/mobile/weex/interviewCard/icon_arrangement_2.png',
-                text: 'in-查看'
-              }
-            }
+            btnOkIcon: 'https://img09.zhaopin.cn/2012/other/mobile/weex/interviewCard/icon_arrangement_2.png',
+            btnOkText: 'in-查看'
           },
           {
             name: 'in-invitation',
@@ -343,15 +362,18 @@
             title: 'in-你的面试邀请',
             content: 'in-面试邀请详情',
             image: 'https://img09.zhaopin.cn/2012/other/mobile/weex/interviewCard/card_invitation_2.png',
-            btn: {
-              ok: {
-                icon: 'https://img09.zhaopin.cn/2012/other/mobile/weex/interviewCard/icon_invitation_2.png',
-                text: 'in-查看'
-              }
-            }
+            btnOkIcon: 'https://img09.zhaopin.cn/2012/other/mobile/weex/interviewCard/icon_invitation_2.png',
+            btnOkText: 'in-查看'
           }
         ],
-        showFooter: false
+        showFooter: false,
+        uploadImageModal: {
+          shown: false,
+          origin: '',
+          dest: '',
+          name: '',
+          index: -1
+        }
       }
     },
     computed: {
@@ -366,6 +388,56 @@
       }
     },
     methods: {
+      changeImage (args) {
+        this.uploadImageModal.shown = false
+      },
+      chooseImage (args) {
+        /**
+         * 打开图片选择框
+         * @type {{shown: boolean, origin: *, dest: string, target: *, name: *, index: *}}
+         */
+        this.uploadImageModal = {
+          shown: true,
+          origin: args.src,
+          dest: '',
+          target: args.target,
+          name: args.name,
+          index: args.index
+        }
+      },
+      changeImageUrl (e) {
+        this.uploadImageModal.dest = e.target.value
+      },
+      confirmChangeImage () {
+        let _names = this.uploadImageModal.name.split('.')
+        if (_names.length <= 1) {
+          this[this.uploadImageModal.target][this.uploadImageModal.index][this.uploadImageModal.name] = this.uploadImageModal.dest
+        } else {
+          let _key = this[this.uploadImageModal.target][this.uploadImageModal.index]
+          for (let i = 0; i < _names.length; i++) {
+            _key = _key[_names[i]]
+          }
+          window[_key] = this.uploadImageModal.dest
+        }
+        this.uploadImageModal = {
+          shown: false,
+          origin: '',
+          dest: '',
+          target: '',
+          name: '',
+          index: -1
+        }
+      },
+      cancelChangeImage () {
+        this.uploadImageModal = {
+          shown: false,
+          origin: '',
+          dest: '',
+          name: '',
+          target: '',
+          index: -1
+        }
+      },
       onMove ({relatedContext, draggedContext}) {
 //        const relatedElement = relatedContext.element
 //        const draggedElement = draggedContext.element
